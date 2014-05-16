@@ -6,16 +6,11 @@ use warnings;
 # maxProd.pl <data set>
 # sets: lil med big Big
 
-my @args = qw(lil med big Big);
 my $arg = shift || die "Usage:\n\tmaxProd lil for 6x6 array\n",
                                      "\t\tmed for 10x10 array\n",
                                      "\t\tbig for Prob11 array\n",
                                      "\t\tBig for 20x20 array\n";
-
-die "\tArray \"$arg\" not recognized...\n" unless ( $arg ~~ @args );
-
-my $data =  "\$${arg}Str";
-
+# initialize the data sets
 my $lilStr = <<DATA;
 00 01 02 03 04 05
 10 11 12 13 14 15
@@ -84,26 +79,41 @@ my $BigStr = <<DATA;
 1900 1901 1902 1903 1904 1905 1906 1907 1908 1909 1910 1911 1912 1913 1914 1915 1916 1917 1918 1919
 DATA
 
+# associate datasets to argument string
+my $h_args = {
+    "lil" => $lilStr,
+    "med" => $medStr,
+    "big" => $bigStr,
+    "Big" => $BigStr,
+};
+
+# check for valid argument string entered
+my $data = ( exists $h_args->{$arg} )
+    ? $h_args->{$arg}
+    : die "\tArray \"$arg\" not recognized...\n";
 print "$data\n";
+
+# initialize array stuff...
 my $count = 0;
 my $sSize = 4;               # actual sample size
-my $smpl = $sSize - 1;       # adjusted sample size
-my $array = [];
-push @$array, map { [ split( / /, $_ ) ] }
-              map( $_, split( /\n/, eval($data) ) );
-my $aSize = scalar(@$array);
-my $last = $#$array;         # last array index
+my $smpl  = $sSize - 1;      # adjusted sample size
+
+# process raw data into array_ref
+my $array_ref  = [ map { [ split( / / ) ] } split( /\n/, $data ) ];
+my $array_last = $#$array_ref;
+my $array_size =  @$array_ref;
 my @allArray;
+
 # work on horizontal and vertical
 my (@horz, @vert);
 my ($hmax, $vmax) = (1) x 2;
-my $hvItr = $aSize - $sSize;
-for my $z (0..$hvItr) {
-    for my $y (0..$last) {
+my $iters = $array_size - $sSize;
+for my $z (0..$iters) {
+    for my $y (0..$array_last) {
         my ( $h, $v ) = (1) x 2;
         for my $x (0..$smpl) {
-            push @horz, $array->[$y][$x + $z];
-            push @vert, $array->[$x + $z][$y];
+            push @horz, $array_ref->[$y][$x + $z];
+            push @vert, $array_ref->[$x + $z][$y];
         }
         push @allArray, ["h:", @horz, "v:", @vert, "c:", $count];
         $h *= $_ for @horz;
@@ -114,17 +124,17 @@ for my $z (0..$hvItr) {
         ( @horz, @vert ) = ( ) x 2;
     }
 }
+
 # work on the diagonals
 my (@diup, @didn);
 my ($umax, $dmax) = (1) x 2;
-my $diItr = $aSize - $sSize;
-for my $z (0..$diItr) {
-    for my $y (0..$diItr) {
+for my $z (0..$iters) {
+    for my $y (0..$iters) {
         my $o = 0;
         my ( $u, $d ) = (1) x 2;
         for my $x (0..$smpl) {
-            push @diup, $array->[$last - $o - $y][$x + $z];
-            push @didn, $array->[$x + $z][$y + $o++];
+            push @diup, $array_ref->[$array_last - $o - $y][$x + $z];
+            push @didn, $array_ref->[$x + $z][$y + $o++];
         }
         push @allArray, ["u:", @diup, "d:", @didn, "c:", $count];
         $u *= $_ for @diup;
@@ -135,6 +145,8 @@ for my $z (0..$diItr) {
         ( @diup, @didn ) = ( ) x 2;
     }
 }
+
+# $max is...
 my $max = ( $hmax > $vmax )
             ? ( $umax > $dmax )
                 ? ( $hmax > $umax ) ? $hmax : $umax
@@ -142,8 +154,10 @@ my $max = ( $hmax > $vmax )
             : ( $umax > $dmax )
                 ? ( $vmax > $umax ) ? $vmax : $umax
                 : ( $vmax > $dmax ) ? $vmax : $dmax;
+
+# results
 print "@$_\n" for (@allArray);
 print "Max values found:\n";
-print "horz: ", $hmax, ", vert: ", $vmax, "\n";
-print "diup: ", $umax, ", didn: ", $dmax, "\n";
-print "winner: ", $max, "\n";
+print "horz:   ", $hmax, ", vert: ", $vmax, "\n";
+print "diup:   ", $umax, ", didn: ", $dmax, "\n";
+print "winner: ", $max,  "\n";
