@@ -8,7 +8,7 @@ use Data::Dumper;
 
 # Read in file into array of row strings
 my $filename = shift;
-die "File nissing" unless $filename;
+die "File missing" unless $filename;
 
 my @file_array;
 open(my $fh, "<", $filename) or die "Didn't happen...\n"; 
