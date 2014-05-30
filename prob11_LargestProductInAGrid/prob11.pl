@@ -7,10 +7,13 @@ sub makeGrid {
     my $i = shift;
     my $grid = "";
     for ( 1..$i ) {
-        $grid .= join( " ", map {
-            my $n = int( 100 * rand() );
-            ( $n < 10 ) ? "0" . $n : $n
-        } ( 1..$i ) );
+        $grid .=
+            join( " ",
+                map {
+                    my $n = int( 100 * rand() );
+                    ( $n < 10 ) ? "0" . $n : $n
+                } ( 1..$i )
+            );
         $grid .= "\n";
     }
     return $grid;
@@ -41,19 +44,22 @@ my $origData = <<'DATA';
 01 70 54 71 83 51 54 69 16 92 33 48 61 43 52 01 89 19 67 48
 DATA
 
+# initialize array stuff...
 my $sSize = 4;               # actual sample size
-my $smpl = $sSize - 1;       # adjusted sample size
-my $array_ref = [ map { [ split( / / ) ] } split( /\n/, $data ) ];          # data
+my $smpl  = $sSize - 1;      # adjusted sample size
+
 # process raw data into array_ref
-my $aRefSize = scalar(@$array_ref);
-my $iters = $aRefSize - $sSize;    # iteration count
-my $last = $#$array_ref;           # last array_ref index
+my $array_ref  = [ map { [ split ] } split( /\n/, $data ) ];
+my $array_last = $#$array_ref;
+my $array_size =  @$array_ref;
+
 # work on horizontal and vertical
-my ($hmax, $vmax) = (1) x 2;
-for my $z (0..$iters) {
-    for my $y (0..$last) {
-        my ( $h, $v ) = (1) x 2;
-        for my $x (0..$smpl) {
+my ( $hmax, $vmax ) = ( 1 ) x 2;
+my $iters = $array_size - $sSize;    # iteration count
+for my $z ( 0 .. $iters ) {
+    for my $y ( 0 .. $array_last ) {
+        my ( $h, $v ) = ( 1 ) x 2;
+        for my $x ( 0 .. $smpl ) {
             $h *= $array_ref->[$y][$x + $z];
             $v *= $array_ref->[$x + $z][$y];
         }
@@ -62,13 +68,13 @@ for my $z (0..$iters) {
     }
 }
 # work on the diagonals
-my ($umax, $dmax) = (1) x 2;
-for my $z (0..$iters) {
-    for my $y (0..$iters) {
+my ( $umax, $dmax ) = ( 1 ) x 2;
+for my $z ( 0 .. $iters ) {
+    for my $y ( 0 .. $iters ) {
         my $offset = 0;
         my ( $u, $d ) = (1) x 2;
-        for my $x (0..$smpl) {
-            $u *= $array_ref->[$last - $y - $offset][$x + $z];
+        for my $x ( 0 .. $smpl) {
+            $u *= $array_ref->[$array_last - $y - $offset][$x + $z];
             $d *= $array_ref->[$x + $z][$y + $offset++];
         }
         $umax = ( $u > $umax ) ? $u : $umax;
@@ -83,6 +89,6 @@ my $max = ( $hmax > $vmax )
             : ( $umax > $dmax )
                 ? ( $vmax > $umax ) ? $vmax : $umax
                 : ( $vmax > $dmax ) ? $vmax : $dmax;
-print "hmax: $hmax, vmax: $vmax\n";
-print "umax: $umax, dmax: $dmax\n";
+print "hmax:   $hmax, vmax: $vmax\n";
+print "umax:   $umax, dmax: $dmax\n";
 print "winner: $max\n";

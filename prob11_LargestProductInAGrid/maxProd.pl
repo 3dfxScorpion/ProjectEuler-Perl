@@ -99,23 +99,23 @@ my $sSize = 4;               # actual sample size
 my $smpl  = $sSize - 1;      # adjusted sample size
 
 # process raw data into array_ref
-my $array_ref  = [ map { [ split( / / ) ] } split( /\n/, $data ) ];
+my $array_ref  = [ map { [ split ] } split( /\n/, $data ) ];
 my $array_last = $#$array_ref;
 my $array_size =  @$array_ref;
 my @allArray;
 
 # work on horizontal and vertical
-my (@horz, @vert);
-my ($hmax, $vmax) = (1) x 2;
+my ( @horz, @vert );
+my ( $hmax, $vmax ) = ( 1 ) x 2;
 my $iters = $array_size - $sSize;
-for my $z (0..$iters) {
-    for my $y (0..$array_last) {
-        my ( $h, $v ) = (1) x 2;
-        for my $x (0..$smpl) {
+for my $z ( 0 .. $iters ) {
+    for my $y ( 0 .. $array_last ) {
+        my ( $h, $v ) =  ( 1 ) x 2;
+        for my $x ( 0 .. $smpl) {
             push @horz, $array_ref->[$y][$x + $z];
             push @vert, $array_ref->[$x + $z][$y];
         }
-        push @allArray, ["h:", @horz, "v:", @vert, "c:", $count];
+        push @allArray, [ "h:", @horz, "v:", @vert, "c:", $count ];
         $h *= $_ for @horz;
         $v *= $_ for @vert;
         $count += 2;
@@ -126,17 +126,17 @@ for my $z (0..$iters) {
 }
 
 # work on the diagonals
-my (@diup, @didn);
-my ($umax, $dmax) = (1) x 2;
-for my $z (0..$iters) {
-    for my $y (0..$iters) {
+my ( @diup, @didn );
+my ( $umax, $dmax ) = ( 1 ) x 2;
+for my $z ( 0 .. $iters ) {
+    for my $y ( 0 .. $iters ) {
         my $o = 0;
-        my ( $u, $d ) = (1) x 2;
-        for my $x (0..$smpl) {
-            push @diup, $array_ref->[$array_last - $o - $y][$x + $z];
-            push @didn, $array_ref->[$x + $z][$y + $o++];
+        my ( $u, $d ) = ( 1 ) x 2;
+        for my $x ( 0 .. $smpl ) {
+            push @diup, $array_ref->[ $array_last - $o - $y ][ $x + $z ];
+            push @didn, $array_ref->[ $x + $z ][ $y + $o++ ];
         }
-        push @allArray, ["u:", @diup, "d:", @didn, "c:", $count];
+        push @allArray, [ "u:", @diup, "d:", @didn, "c:", $count ];
         $u *= $_ for @diup;
         $d *= $_ for @didn;
         $count += 2;
@@ -156,7 +156,7 @@ my $max = ( $hmax > $vmax )
                 : ( $vmax > $dmax ) ? $vmax : $dmax;
 
 # results
-print "@$_\n" for (@allArray);
+print "@$_\n" for ( @allArray );
 print "Max values found:\n";
 print "horz:   ", $hmax, ", vert: ", $vmax, "\n";
 print "diup:   ", $umax, ", didn: ", $dmax, "\n";
